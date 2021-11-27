@@ -8,10 +8,8 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
-    var haha = try hm.entity.Entity.new(&gpa.allocator);
-    try haha.add_component(hm.entity.Test, .{5});
-    haha.destroy();
-
+    var scene_bruh = try hm.scene.TestScene.new(&gpa.allocator);
+    scene_bruh.destroy();
     rl.InitWindow(1080, 720, "HAHA");
     defer rl.CloseWindow();
 

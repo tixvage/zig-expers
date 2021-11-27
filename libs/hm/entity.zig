@@ -6,11 +6,13 @@ pub const Entity = struct {
 
     comps: std.ArrayList(*Component),
     allocator: *std.mem.Allocator,
+    name: []const u8,
 
-    pub fn new(allocator: *std.mem.Allocator) !*Self {
+    pub fn new(allocator: *std.mem.Allocator, name: []const u8) !*Self {
         var temp = try allocator.create(Self);
         temp.comps = std.ArrayList(*Component).init(allocator);
         temp.allocator = allocator;
+        temp.name = name;
         return temp;
     }
 
@@ -53,7 +55,7 @@ pub const Component = struct {
     }
 };
 
-pub const Test = struct {
+pub const TestComponent = struct {
     const Self = @This();
     component: Component,
     number: i32,
@@ -68,13 +70,13 @@ pub const Test = struct {
     pub fn update(comp: *Component, deltaTime: f64) void {}
 
     pub fn start(comp: *Component) void {
-        const self = @fieldParentPtr(Test, "component", comp);
+        const self = @fieldParentPtr(TestComponent, "component", comp);
         self.number = 20;
         print("{}\n", .{self.number});
     }
 
     pub fn destroy(comp: *Component, allocator: *std.mem.Allocator) void {
-        const self = @fieldParentPtr(Test, "component", comp);
+        const self = @fieldParentPtr(TestComponent, "component", comp);
         allocator.destroy(self);
     }
 };
