@@ -49,6 +49,26 @@ pub const Scene = struct {
         for (self.entites.items) |bru| {
             bru.destroy();
         }
+        self.entites.deinit();
+    }
+
+    pub fn update(self: *Self, deltaTime: f64) void {
+        for (self.entites.items) |bru| {
+            bru.update(deltaTime);
+        }
+    }
+
+    pub fn render(self: *Self) void {
+        for (self.entites.items) |bru| {
+            bru.render();
+        }
+    }
+
+    pub fn start(self: *Self) !void {
+        try self.create_entities_fn(self);
+        for (self.entites.items) |bru| {
+            bru.start();
+        }
     }
 };
 
