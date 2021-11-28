@@ -1,6 +1,6 @@
 const scene = @import("scene.zig");
 const std = @import("std");
-const rl = @cImport(@cInclude("raylib.h"));
+const rl = @import("rl.zig");
 
 var current_scene: ?*scene.Scene = null;
 
@@ -36,6 +36,7 @@ pub const Game = struct {
             }
             rl.BeginDrawing();
             rl.ClearBackground(rl.RAYWHITE);
+            rl.DrawFPS(20, 20);
 
             if (current_scene != null) {
                 current_scene.?.render();

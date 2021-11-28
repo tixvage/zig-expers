@@ -1,6 +1,6 @@
 const std = @import("std");
 const print = std.debug.print;
-const rl = @cImport(@cInclude("raylib.h"));
+const rl = @import("rl.zig");
 
 pub const Entity = struct {
     const Self = @This();
@@ -79,41 +79,40 @@ pub const TestComponent = struct {
     component: Component,
 
     number: i32,
-    x: f32,
-    y: f32,
+    pos: rl.Vector2,
 
     pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
         var temp = try allocator.create(Self);
         temp.number = args.@"0";
-        temp.x = 30;
-        temp.y = 50;
+        temp.pos.x = args.@"0";
+        temp.pos.y = args.@"1";
         temp.component = Component.new(render, update, start, destroy);
         return temp;
     }
 
     pub fn render(comp: *Component) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
-        rl.DrawFPS(20, 20);
-        rl.DrawRectangle(@floatToInt(c_int, self.x), @floatToInt(c_int, self.y), 20, 20, rl.BLUE);
+        rl.DrawRectangleV(self.pos, rl.Vector2{ .x = 20, .y = 20 }, rl.BLUE);
     }
     pub fn update(comp: *Component, deltaTime: f64) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
 
         if (rl.IsKeyDown(rl.KEY_UP)) {
-            self.y -= 200.0 * @floatCast(f32, deltaTime);
+            self.pos.AddF(0, -(200.0 * @floatCast(f32, deltaTime)));
         } else if (rl.IsKeyDown(rl.KEY_DOWN)) {
-            self.y += 200.0 * @floatCast(f32, deltaTime);
+            self.pos.AddF(0, 200.0 * @floatCast(f32, deltaTime));
         }
 
         if (rl.IsKeyDown(rl.KEY_LEFT)) {
-            self.x -= 200.0 * @floatCast(f32, deltaTime);
+            self.pos.AddF(-(200.0 * @floatCast(f32, deltaTime)), 0);
         } else if (rl.IsKeyDown(rl.KEY_RIGHT)) {
-            self.x += 200.0 * @floatCast(f32, deltaTime);
+            self.pos.AddF(200.0 * @floatCast(f32, deltaTime), 0);
         }
     }
 
     pub fn start(comp: *Component) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
+        //print("hello world\n", .{});
         self.number = 20;
     }
 
