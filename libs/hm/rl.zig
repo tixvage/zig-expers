@@ -111,6 +111,7 @@ pub const struct_CharInfo = extern struct {
     advanceX: c_int,
     image: Image,
 };
+
 pub const CharInfo = struct_CharInfo;
 pub const struct_Font = extern struct {
     baseSize: c_int,
