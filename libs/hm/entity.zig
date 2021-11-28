@@ -93,6 +93,7 @@ pub const TestComponent = struct {
 
     pub fn render(comp: *Component) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
+        rl.DrawFPS(20, 20);
         rl.DrawRectangle(@floatToInt(c_int, self.x), @floatToInt(c_int, self.y), 20, 20, rl.BLUE);
     }
     pub fn update(comp: *Component, deltaTime: f64) void {
