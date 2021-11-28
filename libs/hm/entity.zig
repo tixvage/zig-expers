@@ -92,7 +92,7 @@ pub const TestComponent = struct {
 
     pub fn render(comp: *Component) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
-        rl.DrawRectangleV(self.pos, rl.Vector2{ .x = 20, .y = 20 }, rl.BLUE);
+        rl.DrawRectangleV(self.pos, rl.Vector2{ .x = 200, .y = 200 }, rl.BLUE);
     }
     pub fn update(comp: *Component, deltaTime: f64) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);

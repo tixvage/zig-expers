@@ -24,6 +24,7 @@ pub fn build(b: *std.build.Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.linkSystemLibrary("raylib");
+    exe.linkSystemLibrary("wren");
     exe.linkLibC();
     exe.install();
 
