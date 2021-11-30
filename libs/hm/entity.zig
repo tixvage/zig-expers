@@ -6,11 +6,13 @@ pub const Entity = struct {
     const Self = @This();
 
     comps: std.ArrayList(*Component),
+    comps_types: std.ArrayList([]const u8),
     allocator: *std.mem.Allocator,
     name: []const u8,
 
     pub fn new(allocator: *std.mem.Allocator, name: []const u8) !*Self {
         var temp = try allocator.create(Self);
+        temp.comps_types = std.ArrayList([]const u8).init(allocator);
         temp.comps = std.ArrayList(*Component).init(allocator);
         temp.allocator = allocator;
         temp.name = name;
@@ -22,12 +24,25 @@ pub const Entity = struct {
             comp.destroy(self.allocator);
         }
         self.comps.deinit();
+        self.comps_types.deinit();
         self.allocator.destroy(self);
     }
 
-    pub fn add_component(self: *Self, comptime T: type, args: anytype) !void {
+    pub fn add_component(self: *Self, comptime T: type, name: []const u8, args: anytype) !void {
         var temp = try T.new(self.allocator, args);
+        temp.component.entity = self;
         try self.comps.append(&temp.component);
+        try self.comps_types.append(name);
+    }
+
+    pub fn get_component(self: *Self, comptime T: type, name: []const u8) ?*T {
+        for (self.comps.items) |comp, i| {
+            if (std.mem.eql(u8, name, self.comps_types.items[i])) {
+                return @fieldParentPtr(T, "component", comp);
+            }
+        }
+        print("{} can not found on {s} entity", .{ T, self.name });
+        return null;
     }
 
     pub fn start(self: *Self) void {
@@ -50,13 +65,15 @@ pub const Entity = struct {
 };
 
 pub const Component = struct {
+    entity: ?*Entity,
+
     renderFn: fn (self: *Component) void,
     updateFn: fn (self: *Component, deltaTime: f64) void,
     startFn: fn (self: *Component) void,
     destroyFn: fn (self: *Component, allocator: *std.mem.Allocator) void,
 
     pub fn new(renderFn: fn (self: *Component) void, updateFn: fn (self: *Component, deltaTime: f64) void, startFn: fn (self: *Component) void, destroyFn: fn (self: *Component, allocator: *std.mem.Allocator) void) Component {
-        return Component{ .renderFn = renderFn, .updateFn = updateFn, .startFn = startFn, .destroyFn = destroyFn };
+        return Component{ .entity = null, .renderFn = renderFn, .updateFn = updateFn, .startFn = startFn, .destroyFn = destroyFn };
     }
 
     pub fn start(self: *Component) void {
@@ -112,12 +129,67 @@ pub const TestComponent = struct {
 
     pub fn start(comp: *Component) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
-        //print("hello world\n", .{});
         self.number = 20;
     }
 
     pub fn destroy(comp: *Component, allocator: *std.mem.Allocator) void {
         const self = @fieldParentPtr(TestComponent, "component", comp);
+        allocator.destroy(self);
+    }
+};
+
+pub const TestComponent2 = struct {
+    const Self = @This();
+
+    component: Component,
+
+    pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
+        var temp = try allocator.create(Self);
+        temp.component = Component.new(render, update, start, destroy);
+        return temp;
+    }
+
+    pub fn render(comp: *Component) void {
+        const self = @fieldParentPtr(TestComponent2, "component", comp);
+    }
+    pub fn update(comp: *Component, deltaTime: f64) void {
+        const self = @fieldParentPtr(TestComponent2, "component", comp);
+    }
+
+    pub fn start(comp: *Component) void {
+        const self = @fieldParentPtr(TestComponent2, "component", comp);
+    }
+
+    pub fn destroy(comp: *Component, allocator: *std.mem.Allocator) void {
+        const self = @fieldParentPtr(TestComponent2, "component", comp);
+        allocator.destroy(self);
+    }
+};
+
+pub const Template = struct {
+    const Self = @This();
+
+    component: Component,
+
+    pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
+        var temp = try allocator.create(Self);
+        temp.component = Component.new(render, update, start, destroy);
+        return temp;
+    }
+
+    pub fn render(comp: *Component) void {
+        const self = @fieldParentPtr(Template, "component", comp);
+    }
+    pub fn update(comp: *Component, deltaTime: f64) void {
+        const self = @fieldParentPtr(Template, "component", comp);
+    }
+
+    pub fn start(comp: *Component) void {
+        const self = @fieldParentPtr(Template, "component", comp);
+    }
+
+    pub fn destroy(comp: *Component, allocator: *std.mem.Allocator) void {
+        const self = @fieldParentPtr(Template, "component", comp);
         allocator.destroy(self);
     }
 };

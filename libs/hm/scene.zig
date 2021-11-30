@@ -1,6 +1,7 @@
 const entity = @import("entity.zig");
 const std = @import("std");
 const print = std.debug.print;
+const comps = @import("components.zig");
 
 pub const Scene = struct {
     const Self = @This();
@@ -96,7 +97,10 @@ pub const TestScene = struct {
     }
     pub fn create_entities(scene: *Scene) anyerror!void {
         var entity1 = try scene.add_entity("entity1");
-        try entity1.add_component(entity.TestComponent, .{ 5, 50 });
+
+        var entity2 = try scene.add_entity("entity2");
+        try entity2.add_component(comps.Transform, "Transform", .{});
+        try entity2.add_component(comps.SpriteRenderer, "SpriteRenderer", .{"assets/bruh.png"});
     }
     pub fn destroy(scene: *Scene) i32 {
         const self = @fieldParentPtr(TestScene, "scene", scene);
