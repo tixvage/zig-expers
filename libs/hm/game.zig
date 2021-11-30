@@ -1,5 +1,6 @@
 const scene = @import("scene.zig");
 const std = @import("std");
+const print = std.debug.print;
 const rl = @import("rl.zig");
 
 var current_scene: ?*scene.Scene = null;
@@ -36,17 +37,17 @@ pub const Game = struct {
             }
             rl.BeginDrawing();
             rl.ClearBackground(rl.RAYWHITE);
-            rl.DrawFPS(20, 20);
-
             if (current_scene != null) {
                 current_scene.?.render();
             }
-
+            rl.DrawFPS(20, 20);
             rl.EndDrawing();
         }
 
         if (current_scene != null) {
             current_scene.?.destroy();
         }
+
+        rl.CloseWindow();
     }
 };
