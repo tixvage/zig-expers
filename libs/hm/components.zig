@@ -15,7 +15,7 @@ pub const Transform = struct {
     pub fn Move(self: *Self, mvmnt: rl.Vector2) void {
         self.position.AddV(mvmnt);
         if (self.child != null) {
-            self.child.?.get_component(Transform, "Transform").?.Move(mvmnt);
+            self.child.?.get_component(Transform).?.Move(mvmnt);
         }
     }
 
@@ -87,7 +87,7 @@ pub const SpriteRenderer = struct {
 
     pub fn start(comp: *entity.Component) void {
         const self = @fieldParentPtr(SpriteRenderer, "component", comp);
-        self.transform = comp.entity.?.get_component(Transform, "Transform").?;
+        self.transform = comp.entity.?.get_component(Transform).?;
     }
 
     pub fn destroy(comp: *entity.Component, allocator: *std.mem.Allocator) void {

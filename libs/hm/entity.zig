@@ -28,16 +28,16 @@ pub const Entity = struct {
         self.allocator.destroy(self);
     }
 
-    pub fn add_component(self: *Self, comptime T: type, name: []const u8, args: anytype) !void {
+    pub fn add_component(self: *Self, comptime T: type, args: anytype) !void {
         var temp = try T.new(self.allocator, args);
         temp.component.entity = self;
         try self.comps.append(&temp.component);
-        try self.comps_types.append(name);
+        try self.comps_types.append(@typeName(T));
     }
 
-    pub fn get_component(self: *Self, comptime T: type, name: []const u8) ?*T {
+    pub fn get_component(self: *Self, comptime T: type) ?*T {
         for (self.comps.items) |comp, i| {
-            if (std.mem.eql(u8, name, self.comps_types.items[i])) {
+            if (std.mem.eql(u8, @typeName(T), self.comps_types.items[i])) {
                 return @fieldParentPtr(T, "component", comp);
             }
         }

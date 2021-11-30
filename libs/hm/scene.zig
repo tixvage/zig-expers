@@ -99,8 +99,8 @@ pub const TestScene = struct {
         var entity1 = try scene.add_entity("entity1");
 
         var entity2 = try scene.add_entity("entity2");
-        try entity2.add_component(comps.Transform, "Transform", .{});
-        try entity2.add_component(comps.SpriteRenderer, "SpriteRenderer", .{"assets/bruh.png"});
+        try entity2.add_component(comps.Transform, .{});
+        try entity2.add_component(comps.SpriteRenderer, .{"assets/bruh.png"});
     }
     pub fn destroy(scene: *Scene) i32 {
         const self = @fieldParentPtr(TestScene, "scene", scene);
