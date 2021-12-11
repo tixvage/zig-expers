@@ -45,18 +45,6 @@ pub const PhysicWorld = struct {
                         .width = @intToFloat(f32, static.aabb.w),
                     },
                 )) {
-                    var rect = rl.Rectangle{ .x = 0.0, .y = 0.0, .width = 0.0, .height = 0.0 };
-                    rect = rl.GetCollisionRec(rl.Rectangle{
-                        .x = @intToFloat(f32, dynamic.aabb.x),
-                        .y = @intToFloat(f32, dynamic.aabb.y),
-                        .height = @intToFloat(f32, dynamic.aabb.h),
-                        .width = @intToFloat(f32, dynamic.aabb.w),
-                    }, rl.Rectangle{
-                        .x = @intToFloat(f32, static.aabb.x),
-                        .y = @intToFloat(f32, static.aabb.y),
-                        .height = @intToFloat(f32, static.aabb.h),
-                        .width = @intToFloat(f32, static.aabb.w),
-                    });
                     std.debug.print("{d}:{d}\n", .{ dynamic.velocity.x, dynamic.velocity.y });
                     dynamic.transform.position.AddF(-dynamic.velocity.x, -dynamic.velocity.y); //@intToFloat(f32, @floatToInt(i32, rect.width + 1.0));
                     //dynamic.transform.position.y -= rect.height + 1.0;
