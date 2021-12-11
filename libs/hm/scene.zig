@@ -9,8 +9,10 @@ pub const Scene = struct {
     create_entities_fn: ?fn (self: *Self) anyerror!void,
     destroy_fn: ?fn (self: *Self) i32,
     update_fn: ?fn (self: *Self, deltaTime: f32) void,
+
     entites: std.ArrayList(*entity.Entity),
     allocator: *std.mem.Allocator,
+    pw: comps.PhysicWorld,
 
     fn empty_ce(self: *Self) anyerror!void {}
     fn empyt_update(self: *Self, deltaTime: f32) void {}
@@ -42,7 +44,7 @@ pub const Scene = struct {
             temp.create_entities_fn = empty_ce;
         }
         temp.entites = std.ArrayList(*entity.Entity).init(allocator);
-
+        temp.pw = comps.PhysicWorld.new(allocator);
         return temp;
     }
 
@@ -53,6 +55,7 @@ pub const Scene = struct {
     }
 
     pub fn _destroy(self: *Self) void {
+        self.pw.destroy();
         for (self.entites.items) |bru| {
             bru.destroy();
         }
@@ -60,6 +63,7 @@ pub const Scene = struct {
     }
 
     pub fn update(self: *Self, deltaTime: f64) void {
+        self.pw.update();
         for (self.entites.items) |bru| {
             bru.update(deltaTime);
         }
@@ -97,10 +101,14 @@ pub const TestScene = struct {
     }
     pub fn create_entities(scene: *Scene) anyerror!void {
         var entity1 = try scene.add_entity("entity1");
+        try entity1.add_component(comps.Transform, .{ 20, 20 });
+        try entity1.add_component(comps.Collider, .{ &scene.pw, true });
 
         var entity2 = try scene.add_entity("entity2");
-        try entity2.add_component(comps.Transform, .{});
+        try entity2.add_component(comps.BasicMovement, .{});
+        try entity2.add_component(comps.Transform, .{ 500, 500 });
         try entity2.add_component(comps.SpriteRenderer, .{"assets/bruh.png"});
+        try entity2.add_component(comps.Collider, .{ &scene.pw, false });
     }
     pub fn destroy(scene: *Scene) i32 {
         const self = @fieldParentPtr(TestScene, "scene", scene);
