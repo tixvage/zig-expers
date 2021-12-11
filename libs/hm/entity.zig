@@ -65,7 +65,7 @@ pub const Entity = struct {
 };
 
 pub const Component = struct {
-    entity: ?*Entity,
+    entity: *Entity,
 
     renderFn: fn (self: *Component) void,
     updateFn: fn (self: *Component, deltaTime: f64) void,
@@ -73,7 +73,7 @@ pub const Component = struct {
     destroyFn: fn (self: *Component, allocator: *std.mem.Allocator) void,
 
     pub fn new(renderFn: fn (self: *Component) void, updateFn: fn (self: *Component, deltaTime: f64) void, startFn: fn (self: *Component) void, destroyFn: fn (self: *Component, allocator: *std.mem.Allocator) void) Component {
-        return Component{ .entity = null, .renderFn = renderFn, .updateFn = updateFn, .startFn = startFn, .destroyFn = destroyFn };
+        return Component{ .entity = undefined, .renderFn = renderFn, .updateFn = updateFn, .startFn = startFn, .destroyFn = destroyFn };
     }
 
     pub fn start(self: *Component) void {

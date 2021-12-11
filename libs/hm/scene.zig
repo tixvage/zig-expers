@@ -106,6 +106,7 @@ pub const TestScene = struct {
 
         var entity2 = try scene.add_entity("entity2");
         try entity2.add_component(comps.BasicMovement, .{});
+        try entity2.add_component(comps.KinematicBody, .{});
         try entity2.add_component(comps.Transform, .{ 500, 500 });
         try entity2.add_component(comps.SpriteRenderer, .{"assets/bruh.png"});
         try entity2.add_component(comps.Collider, .{ &scene.pw, false });

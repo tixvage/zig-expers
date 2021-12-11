@@ -57,11 +57,9 @@ pub const PhysicWorld = struct {
                         .height = @intToFloat(f32, static.aabb.h),
                         .width = @intToFloat(f32, static.aabb.w),
                     });
-                    self.hm += 1;
-                    std.debug.print("{d}:{d}\n", .{ rect.x, rect.y });
-                    dynamic.transform.position.x += 200.0 * @floatCast(f32, rl.GetFrameTime()); //@intToFloat(f32, @floatToInt(i32, rect.width + 1.0));
+                    std.debug.print("{d}:{d}\n", .{ dynamic.velocity.x, dynamic.velocity.y });
+                    dynamic.transform.position.AddF(-dynamic.velocity.x, -dynamic.velocity.y); //@intToFloat(f32, @floatToInt(i32, rect.width + 1.0));
                     //dynamic.transform.position.y -= rect.height + 1.0;
-                    std.debug.print("Collision! {}\n", .{self.hm});
                 }
             }
         }
@@ -78,6 +76,8 @@ pub const BasicMovement = struct {
 
     component: entity.Component,
     transform: *Transform,
+    body: *KinematicBody,
+    velocity: rl.Vector2,
 
     pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
         var temp = try allocator.create(Self);
@@ -90,22 +90,30 @@ pub const BasicMovement = struct {
     pub fn update(comp: *entity.Component, deltaTime: f64) void {
         const self = @fieldParentPtr(BasicMovement, "component", comp);
 
+        self.velocity = rl.Vector2{
+            .x = 0,
+            .y = 0,
+        };
+
         if (rl.IsKeyDown(rl.KEY_UP)) {
-            self.transform.Move(rl.Vector2{ .x = 0, .y = -(200.0 * @floatCast(f32, deltaTime)) });
+            self.velocity.AddV(rl.Vector2{ .x = 0, .y = -(200.0 * @floatCast(f32, deltaTime)) });
         } else if (rl.IsKeyDown(rl.KEY_DOWN)) {
-            self.transform.Move(rl.Vector2{ .x = 0, .y = (200.0 * @floatCast(f32, deltaTime)) });
+            self.velocity.AddV(rl.Vector2{ .x = 0, .y = (200.0 * @floatCast(f32, deltaTime)) });
         }
 
         if (rl.IsKeyDown(rl.KEY_LEFT)) {
-            self.transform.Move(rl.Vector2{ .x = -(200.0 * @floatCast(f32, deltaTime)), .y = 0 });
+            self.velocity.AddV(rl.Vector2{ .x = -(200.0 * @floatCast(f32, deltaTime)), .y = 0 });
         } else if (rl.IsKeyDown(rl.KEY_RIGHT)) {
-            self.transform.Move(rl.Vector2{ .x = (200.0 * @floatCast(f32, deltaTime)), .y = 0 });
+            self.velocity.AddV(rl.Vector2{ .x = (200.0 * @floatCast(f32, deltaTime)), .y = 0 });
         }
+
+        self.body.move(self.velocity);
     }
 
     pub fn start(comp: *entity.Component) void {
         const self = @fieldParentPtr(BasicMovement, "component", comp);
-        self.transform = comp.entity.?.get_component(Transform).?;
+        self.transform = comp.entity.get_component(Transform).?;
+        self.body = comp.entity.get_component(KinematicBody).?;
     }
 
     pub fn destroy(comp: *entity.Component, allocator: *std.mem.Allocator) void {
@@ -186,7 +194,7 @@ pub const SpriteRenderer = struct {
 
     pub fn start(comp: *entity.Component) void {
         const self = @fieldParentPtr(SpriteRenderer, "component", comp);
-        self.transform = comp.entity.?.get_component(Transform).?;
+        self.transform = comp.entity.get_component(Transform).?;
     }
 
     pub fn destroy(comp: *entity.Component, allocator: *std.mem.Allocator) void {
@@ -204,6 +212,7 @@ pub const Collider = struct {
     aabb: AABB,
     transform: *Transform,
     pw: *PhysicWorld,
+    velocity: rl.Vector2,
 
     pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
         var temp = try allocator.create(Self);
@@ -231,7 +240,7 @@ pub const Collider = struct {
 
     pub fn start(comp: *entity.Component) void {
         const self = @fieldParentPtr(Collider, "component", comp);
-        self.transform = comp.entity.?.get_component(Transform).?;
+        self.transform = comp.entity.get_component(Transform).?;
 
         self.aabb.x = @floatToInt(i32, self.transform.position.x);
         self.aabb.y = @floatToInt(i32, self.transform.position.y);
@@ -254,7 +263,7 @@ pub const KinematicBody = struct {
 
     pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
         var temp = try allocator.create(Self);
-        temp.component = Component.new(render, update, start, destroy);
+        temp.component = entity.Component.new(render, update, start, destroy);
         return temp;
     }
 
@@ -277,6 +286,7 @@ pub const KinematicBody = struct {
 
     pub fn move(self: *Self, vel: rl.Vector2) void {
         self.velocity = vel;
+        self.collider.velocity = vel;
         self.collider.transform.Move(self.velocity);
     }
 };
