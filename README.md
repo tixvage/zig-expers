@@ -8,3 +8,4 @@
 - [ ] resource management
 - [ ] tween
 - [ ] physic bodies
+- [x] scene loading (in progress)
