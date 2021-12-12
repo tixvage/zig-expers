@@ -1,6 +1,7 @@
 const std = @import("std");
 const entity = @import("entity.zig");
 const rl = @import("rl.zig");
+const print = std.debug.print;
 
 pub const AABB = struct {
     x: i32,
@@ -31,24 +32,27 @@ pub const PhysicWorld = struct {
     pub fn update(self: *Self) void {
         for (self.dynamics.items) |dynamic| {
             for (self.statics.items) |static| {
-                if (rl.CheckCollisionRecs(
-                    rl.Rectangle{
-                        .x = @intToFloat(f32, dynamic.aabb.x),
-                        .y = @intToFloat(f32, dynamic.aabb.y),
-                        .height = @intToFloat(f32, dynamic.aabb.h),
-                        .width = @intToFloat(f32, dynamic.aabb.w),
-                    },
-                    rl.Rectangle{
-                        .x = @intToFloat(f32, static.aabb.x),
-                        .y = @intToFloat(f32, static.aabb.y),
-                        .height = @intToFloat(f32, static.aabb.h),
-                        .width = @intToFloat(f32, static.aabb.w),
-                    },
-                )) {
-                    std.debug.print("{d}:{d}\n", .{ dynamic.velocity.x, dynamic.velocity.y });
-                    dynamic.transform.position.AddF(-dynamic.velocity.x, -dynamic.velocity.y); //@intToFloat(f32, @floatToInt(i32, rect.width + 1.0));
-                    //dynamic.transform.position.y -= rect.height + 1.0;
-                }
+                if (std.mem.eql(u8, dynamic.layer, static.layer)) {
+                    if (rl.CheckCollisionRecs(
+                        rl.Rectangle{
+                            .x = @intToFloat(f32, dynamic.aabb.x),
+                            .y = @intToFloat(f32, dynamic.aabb.y),
+                            .height = @intToFloat(f32, dynamic.aabb.h),
+                            .width = @intToFloat(f32, dynamic.aabb.w),
+                        },
+                        rl.Rectangle{
+                            .x = @intToFloat(f32, static.aabb.x),
+                            .y = @intToFloat(f32, static.aabb.y),
+                            .height = @intToFloat(f32, static.aabb.h),
+                            .width = @intToFloat(f32, static.aabb.w),
+                        },
+                    )) {
+                        dynamic.transform.position.AddF(
+                            -dynamic.velocity.x,
+                            -dynamic.velocity.y,
+                        );
+                    }
+                } else {}
             }
         }
     }
@@ -201,16 +205,24 @@ pub const Collider = struct {
     transform: *Transform,
     pw: *PhysicWorld,
     velocity: rl.Vector2,
+    layer: []const u8,
 
     pub fn new(allocator: *std.mem.Allocator, args: anytype) !*Self {
         var temp = try allocator.create(Self);
         temp.component = entity.Component.new(render, update, start, destroy);
-        temp.pw = args.@"0";
-        if (args.@"1" == true) {
+        temp.pw = args[0];
+        if (args[1] == true) {
             try temp.pw.add_static(temp);
         } else {
             try temp.pw.add_dynamic(temp);
         }
+
+        if (args.len > 2) {
+            temp.layer = args[2];
+        } else {
+            temp.layer = "1";
+        }
+
         return temp;
     }
 

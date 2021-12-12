@@ -1,0 +1,5 @@
+IMPORT hm hm
+IMPORT comps clicker_game_comps.zig
+SCENE clicker_gameplay
+ENTITY circle_manager
+COMPONENT circle_manager comps.RandomCircleManager

@@ -1,4 +1,4 @@
-IMPORT comps hm
+IMPORT hm hm
 SCENE Gameplay
 ENTITY player
-COMPONENT player comps.Transform 500 500
+COMPONENT player hm.comps.Transform 500 500
