@@ -17,14 +17,27 @@ pub const Game = struct {
     const Self = @This();
 
     allocator: *std.mem.Allocator,
+    bg: rl.Color,
+    dc: bool,
+
+    pub fn set_clear_background(self: *Self, bg: rl.Color) void {
+        self.bg = bg;
+    }
+
+    pub fn draw_cursor_with_circle(self: *Self) void {
+        self.dc = true;
+    }
+
+    pub fn set_title(self: *Self, title: [*c]const u8) void {
+        rl.SetWindowTitle(title);
+    }
 
     pub fn new(allocator: *std.mem.Allocator) Self {
-        return Self{ .allocator = allocator };
+        rl.InitWindow(1080, 720, "hm engine demo");
+        return Self{ .allocator = allocator, .bg = rl.WHITE, .dc = false };
     }
 
     pub fn run(self: *Self) !void {
-        rl.InitWindow(1080, 720, "hm engine demo");
-
         if (current_scene) |_scene| {
             try _scene.start();
         }
@@ -36,11 +49,14 @@ pub const Game = struct {
                 _scene.update(rl.GetFrameTime());
             }
             rl.BeginDrawing();
-            rl.ClearBackground(rl.RAYWHITE);
+            rl.ClearBackground(self.bg);
             if (current_scene) |_scene| {
                 _scene.render();
             }
             rl.DrawFPS(20, 20);
+            if (self.dc) {
+                rl.DrawCircle(rl.GetMouseX(), rl.GetMouseY(), 10, rl.GRAY);
+            }
             rl.EndDrawing();
         }
 
